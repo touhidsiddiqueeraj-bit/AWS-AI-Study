@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1a2a">
+<title>AWS AI & Responsible AI — Study App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1a2a;--surface:#122238;--surface2:#1a2e4a;--surface3:#243a5a;
+  --border:#2a3e5a;--border2:#3a4e6a;
+  --text:#e0eaf0;--text2:#a0c0d0;--text3:#6a8a9a;
+  --accent:#ff9900;--accent2:#cc7a00;--accent-bg:#2a1a0a;
+  --green:#00e676;--green-bg:#0a2a1a;--green-border:#1a4a2a;
+  --red:#ff5252;--red-bg:#2a1010;--red-border:#4a2020;
+  --amber:#ffab40;--amber-bg:#2a1a0a;--amber-border:#4a3a1a;
+  --purple:#b388ff;--purple-bg:#1a0a2a;
+  --sans:'DM Sans',system-ui,sans-serif;--serif:'DM Serif Display',Georgia,serif;--mono:'DM Mono',ui-monospace,monospace;
+  --r:12px;--rs:8px;--rl:16px;
+  --sh:0 2px 8px rgba(0,0,0,.4);--sh-md:0 4px 16px rgba(0,0,0,.5);
+}
+html.light-mode{
+  --bg:#f0f4f8;--surface:#fff;--surface2:#f0f4f8;--surface3:#e2e8f0;
+  --border:#cbd5e1;--border2:#94a3b8;
+  --text:#0f172a;--text2:#334155;--text3:#64748b;
+  --accent:#e67a00;--accent2:#cc6a00;--accent-bg:#fff8e1;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+  --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+  --amber:#ea580c;--amber-bg:#fff7ed;--amber-border:#fed7aa;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 6px rgba(0,0,0,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6}
+.shell{display:flex;flex-direction:column;height:100dvh}
+.topbar{flex-shrink:0;height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:80;box-shadow:var(--sh)}
+.topbar-brand{font-family:var(--serif);font-size:18px;color:var(--text);cursor:pointer;flex:1}
+.topbar-brand em{color:var(--accent);font-style:normal}
+.topbar-pills{display:flex;align-items:center;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid transparent}
+.pill-streak{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);cursor:pointer}
+.pill-xp{background:var(--purple-bg);border-color:#a78bfa40;color:var(--purple)}
+.pill-days{background:var(--surface2);border-color:var(--border);color:var(--text2)}
+.pill-days .pv{color:var(--text);font-weight:700}
+.content{flex:1;min-height:0;display:flex;overflow:hidden}
+.tab{display:none;flex:1;overflow:hidden}
+.tab.active{display:flex;flex-direction:column}
+.sidenav{width:56px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px}
+.snav-btn{width:44px;height:44px;border-radius:var(--rs);border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);font-size:9px;font-weight:600;transition:all .15s}
+.snav-btn .icon{font-size:18px}
+.snav-btn:hover{background:var(--surface2);color:var(--text2)}
+.snav-btn.active{background:var(--accent-bg);color:var(--accent)}
+.dash-scroll{flex:1;overflow-y:auto;padding:24px 20px 48px}
+.dash-scroll::-webkit-scrollbar{width:4px}
+.dash-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.dash-title{font-family:var(--serif);font-size:28px;line-height:1.15;margin:4px 0 24px}
+.dash-title em{color:var(--accent);font-style:normal}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:var(--sh)}
+.card-pad{padding:16px}
+.card-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.big-bar-wrap{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.big-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#ffcc80);border-radius:4px;transition:width .7s}
+.bar-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--text3)}
+.lvl-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.lvl-tag{font-size:11px;font-weight:700;color:var(--purple);white-space:nowrap}
+.lvl-bar-wrap{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.lvl-bar-fill{height:100%;background:var(--purple);border-radius:2px;transition:width .5s}
+.stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--sh)}
+.stat-val{font-family:var(--serif);font-size:28px;margin-bottom:4px}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase}
+.phase-rows{display:flex;flex-direction:column}
+.phase-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ph-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.ph-name{font-size:12px;font-weight:500;color:var(--text2);flex:1}
+.ph-bar-wrap{width:80px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;flex-shrink:0}
+.ph-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.ph-pct{font-size:11px;font-weight:700;color:var(--text3);width:28px;text-align:right}
+.heatmap{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;padding:4px 0}
+.hm-cell{aspect-ratio:1;border-radius:3px;background:var(--surface3);cursor:pointer;transition:transform .12s}
+.hm-cell:hover{transform:scale(1.35);z-index:5}
+.hm-cell.done{background:var(--accent)}
+.quick-btns{display:flex;gap:8px;flex-wrap:wrap}
+.qbtn{flex:1;min-width:120px;padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:8px;transition:all .18s;font-family:var(--sans)}
+.qbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.qbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.study-layout{display:flex;flex:1;overflow:hidden}
+.study-sb{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.study-sb::-webkit-scrollbar{width:3px}
+.study-sb::-webkit-scrollbar-thumb{background:var(--border2)}
+.sb-back{padding:10px 14px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;transition:color .15s;text-transform:uppercase}
+.sb-back:hover{color:var(--accent)}
+.sb-phase{border-bottom:1px solid var(--border)}
+.sb-ph-hdr{padding:8px 14px 4px;display:flex;align-items:center;gap:6px}
+.sb-ph-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.sb-ph-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;flex:1}
+.sb-day{display:flex;align-items:center;gap:6px;padding:5px 14px 5px 18px;cursor:pointer;transition:background .12s;border-left:2px solid transparent;font-size:11px}
+.sb-day:hover{background:var(--surface2)}
+.sb-day.active{background:var(--accent-bg);border-left-color:var(--accent)}
+.sb-day.done{opacity:.55}
+.sb-chk{width:14px;height:14px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.study-main{flex:1;overflow-y:auto}
+.study-main::-webkit-scrollbar{width:4px}
+.study-main::-webkit-scrollbar-thumb{background:var(--border2)}
+.day-page{padding:20px 20px 80px;max-width:720px;margin:0 auto}
+.day-hdr{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.day-num-bg{font-family:var(--serif);font-size:64px;line-height:1;opacity:.06;min-width:72px;text-align:right;user-select:none}
+.day-title{font-family:var(--serif);font-size:22px;line-height:1.3;margin-bottom:4px}
+.day-meta{font-size:11px;color:var(--text3)}
+.dc{margin-bottom:12px}
+.dc-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.dc-icon{font-size:14px}
+.dc-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;flex:1}
+.dc-body{padding:14px;font-size:13px;color:var(--text2);line-height:1.7}
+.checklist{display:flex;flex-direction:column;gap:3px;padding:12px 14px}
+.ci{display:flex;align-items:flex-start;gap:10px;padding:7px 8px;border-radius:var(--rs);cursor:pointer;transition:background .12s;user-select:none}
+.ci:hover{background:var(--surface2)}
+.ci.checked .ci-box{background:var(--green);border-color:var(--green)}
+.ci.checked .ci-box::after{content:'✓';font-size:9px;color:#fff;font-weight:700}
+.ci-box{width:18px;height:18px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ci-txt{font-size:13px;line-height:1.5;color:var(--text2);flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
+.chip{padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text2);font-family:var(--mono)}
+.chip em{color:var(--accent);font-style:normal;font-weight:600}
+.vid-list{display:flex;flex-direction:column;gap:6px;padding:12px 14px}
+.vid-card{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);text-decoration:none;transition:all .18s;cursor:pointer;color:inherit}
+.vid-card:hover{border-color:var(--accent);background:var(--accent-bg);transform:translateX(3px)}
+.vid-play-btn{width:34px;height:34px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vid-play-arrow{width:0;height:0;border-style:solid;border-width:6px 0 6px 11px;border-color:transparent transparent transparent #fff;margin-left:2px}
+.vid-info{flex:1;min-width:0}
+.vid-title{font-size:12px;font-weight:600;color:var(--text)}
+.vid-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.complete-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.complete-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--rs);border:1.5px solid var(--green);background:var(--green-bg);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;font-family:var(--sans)}
+.complete-btn:hover{background:var(--green);color:#fff}
+.complete-btn.done{background:var(--green);color:#fff}
+.nav-btns{display:flex;gap:8px}
+.nav-btn{padding:8px 14px;border-radius:var(--rs);border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.nav-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.tests-tab{flex:1;overflow-y:auto;padding:20px 18px 48px}
+.test-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.test-card{padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .18s}
+.test-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tc-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px}
+.tc-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:8px}
+.tc-score{font-size:11px;font-weight:700}
+.tc-score.good{color:var(--green)}.tc-score.ok{color:var(--amber)}.tc-score.bad{color:var(--red)}
+.tc-bar{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:6px}
+.tc-bar-fill{height:100%;border-radius:2px;transition:width .4s}
+.quiz-area{margin-top:16px;padding-bottom:48px}
+.q-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.q-num{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:8px}
+.q-text{font-size:14px;margin-bottom:12px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);cursor:pointer;width:100%;transition:all .15s;text-align:left;font-family:var(--sans)}
+.opt:hover:not(:disabled){background:var(--accent-bg);border-color:var(--accent)}
+.opt.correct{background:var(--green-bg);border-color:var(--green-border)}
+.opt.wrong{background:var(--red-bg);border-color:var(--red-border)}
+.opt.reveal{background:var(--green-bg);border-color:var(--green-border)}
+.explanation{display:none;margin-top:10px;padding:10px;background:var(--accent-bg);border-left:3px solid var(--accent);border-radius:0 var(--rs) var(--rs) 0;font-size:12px;color:var(--text2);line-height:1.6}
+.explanation.show{display:block}
+.results-card{background:var(--surface);padding:24px;text-align:center;display:none;border-radius:var(--rl);box-shadow:var(--sh-md)}
+.results-card.show{display:block}
+.res-score{font-family:var(--serif);font-size:56px}
+.retry-btn{padding:12px 28px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);font-size:14px;font-weight:700;cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay.show{opacity:1;pointer-events:all}
+.modal{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px;z-index:201;transform:translateY(100%);transition:transform .32s;max-width:480px;margin:0 auto}
+.modal.show{transform:translateY(0)}
+.xp-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);opacity:0;background:var(--surface);border:1px solid var(--purple);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;color:var(--purple);z-index:300;pointer-events:none;transition:all .26s}
+.xp-toast.show{opacity:1;transform:translateX(-50%) translateY(-10px)}
+.dm-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.notes-tab{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.notes-scroll{flex:1;overflow-y:auto;padding:12px 14px 40px}
+.notes-scroll::-webkit-scrollbar{width:3px}
+.notes-scroll::-webkit-scrollbar-thumb{background:var(--border2)}
+.notes-section{margin-bottom:20px}
+.notes-section-title{font-family:var(--serif);font-size:17px;color:var(--text);margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--border)}
+.notes-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.notes-row{border-bottom:1px solid var(--border)}
+.notes-row:last-child{border-bottom:none}
+.notes-row:hover{background:var(--surface2)}
+.notes-row td{padding:7px 10px;font-size:12px;vertical-align:top}
+.notes-row td:first-child{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent);white-space:nowrap;width:170px}
+.notes-row td:last-child{color:var(--text2);line-height:1.55}
+.badge-w1{background:var(--accent-bg);color:var(--accent)}.badge-w2{background:#0a2a1a;color:var(--green)}.badge-w3{background:#0a1a2a;color:#40c4ff}.badge-fin{background:#1a0a2a;color:var(--purple)}
+.dot-w1{background:var(--accent)}.dot-w2{background:var(--green)}.dot-w3{background:#40c4ff}.dot-fin{background:var(--purple)}
+.fill-w1{background:var(--accent)}.fill-w2{background:var(--green)}.fill-w3{background:#40c4ff}.fill-fin{background:var(--purple)}
+@media(max-width:768px){.sidenav{display:none}.study-sb{display:none}.stats-3{grid-template-columns:repeat(2,1fr)}.test-grid{grid-template-columns:repeat(2,1fr)}.heatmap{grid-template-columns:repeat(20,1fr)}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="topbar-brand" onclick="showDash()">AWS<em>AI</em></div>
+  <div class="topbar-pills">
+    <span class="pill pill-streak" onclick="openStreakModal()">🔥 <span id="ps-num">0</span></span>
+    <span class="pill pill-xp">⚡ <span id="ps-xp">0</span> XP</span>
+    <span class="pill pill-days"><span class="pv" id="ps-done">0</span>/20</span>
+    <button class="dm-btn" onclick="toggleDarkMode()">☀</button>
+  </div>
+</header>
+<div class="content">
+  <nav class="sidenav">
+    <button class="snav-btn active" id="snav-dashboard" onclick="switchTab('dashboard')"><span class="icon">🏠</span>Home</button>
+    <button class="snav-btn" id="snav-study" onclick="switchTab('study')"><span class="icon">📚</span>Study</button>
+    <button class="snav-btn" id="snav-notes" onclick="switchTab('notes')"><span class="icon">📝</span>Notes</button>
+    <button class="snav-btn" id="snav-tests" onclick="switchTab('tests')"><span class="icon">✏️</span>Tests</button>
+  </nav>
+  <div class="tab active" id="tab-dashboard">
+    <div class="dash-scroll">
+      <div style="font-size:12px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Welcome, Cloud Learner</div>
+      <div class="dash-title">Master <em>AWS AI Services</em> & Responsible AI</div>
+      <div class="card"><div class="card-pad">
+        <div class="card-label">Overall Progress</div>
+        <div class="big-bar-wrap"><div class="big-bar-fill" id="big-bar" style="width:0%"></div></div>
+        <div class="bar-meta"><span id="bar-days">0 of 15 days</span><span id="bar-pct">0%</span></div>
+        <div class="lvl-row"><div class="lvl-tag">Lv <span id="lvl-n">1</span></div><div class="lvl-bar-wrap"><div class="lvl-bar-fill" id="lvl-bar" style="width:0%"></div></div><div class="lvl-tag" style="color:var(--text3)"><span id="lvl-xp-next">500</span> XP</div></div>
+      </div></div>
+      <div class="stats-3">
+        <div class="stat-box"><div class="stat-val c-accent" id="d-done">0</div><div class="stat-lbl">Done</div></div>
+        <div class="stat-box"><div class="stat-val c-amber" id="d-streak">0</div><div class="stat-lbl">Streak</div></div>
+        <div class="stat-box"><div class="stat-val c-purple" id="d-xp">0</div><div class="stat-lbl">XP</div></div>
+      </div>
+      <div class="card"><div class="card-pad"><div class="card-label">Phase Progress</div><div class="phase-rows" id="phase-rows"></div></div></div>
+      <div class="card"><div class="card-pad"><div class="card-label">Activity</div><div class="heatmap" id="heatmap"></div></div></div>
+      <div class="quick-btns">
+        <button class="qbtn primary" onclick="goToNextDay()">▶ Continue</button>
+        <button class="qbtn" onclick="switchTab('tests')">✏️ Tests</button>
+        <button class="qbtn" onclick="switchTab('notes')">📝 Notes</button>
+        <button class="qbtn" onclick="openStreakModal()">🔥 Streak</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab" id="tab-study">
+    <div class="study-layout">
+      <aside class="study-sb" id="study-sb"><div class="sb-back" onclick="showDash()">← Dashboard</div><div id="sb-days"></div></aside>
+      <main class="study-main" id="study-main"><div id="day-cards"></div></main>
+    </div>
+  </div>
+  <div class="tab" id="tab-notes"><div class="notes-tab"><div class="notes-scroll" id="notes-content"></div></div></div>
+  <div class="tab" id="tab-tests">
+    <div class="tests-tab">
+      <div style="font-family:var(--serif);font-size:26px;margin-bottom:4px">Practice Tests</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:20px">7 sets · 105 questions · AWS AI Practitioner (AIF-C01)</div>
+      <div class="test-grid" id="test-grid"></div>
+      <div class="quiz-area" id="quiz-area"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+<div class="modal" id="streak-modal">
+  <div style="font-size:48px;text-align:center">🔥</div>
+  <div id="modal-streak-num" style="font-family:var(--serif);font-size:48px;text-align:center;color:var(--amber)">0</div>
+  <div style="text-align:center;font-size:14px;margin:8px 0">Day Streak</div>
+  <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">Keep building your AWS AI knowledge!</div>
+  <button class="retry-btn" style="width:100%" onclick="closeAll()">Keep Studying →</button>
+</div>
+<div class="xp-toast" id="xp-toast"></div>
+
+<script>
+(function(){
+"use strict";
+var currentTab='dashboard',currentDay=null,activeQuiz=null,quizAnswers={},quizCorrect=0;
+var completed=new Set(JSON.parse(localStorage.getItem('awsai_done')||'[]'));
+var subChecks=JSON.parse(localStorage.getItem('awsai_subs')||'{}');
+var testScores=JSON.parse(localStorage.getItem('awsai_scores')||'{}');
+var totalXP=parseInt(localStorage.getItem('awsai_xp')||'0');
+
+function save(){localStorage.setItem('awsai_done',JSON.stringify([...completed]));localStorage.setItem('awsai_subs',JSON.stringify(subChecks));localStorage.setItem('awsai_xp',String(totalXP));}
+function lvl(xp){return Math.floor(xp/500)+1;}
+function xpInLvl(xp){return xp%500;}
+function recordToday(){var t=new Date().toDateString();var d=JSON.parse(localStorage.getItem('awsai_dates')||'[]');if(d.indexOf(t)===-1){d.push(t);localStorage.setItem('awsai_dates',JSON.stringify(d));}}
+function getStreak(){try{var d=JSON.parse(localStorage.getItem('awsai_dates')||'[]');if(!d.length)return 0;var u=[...new Set(d)].sort(function(a,b){return new Date(b)-new Date(a)});var s=0;for(var i=0;i<u.length;i++){if(u[i]===new Date(Date.now()-i*86400000).toDateString())s++;else break;}return s;}catch(e){return 0;}}
+function giveXP(n,lbl){totalXP+=n;save();var t=document.getElementById('xp-toast');t.textContent='+'+n+' XP'+(lbl?' · '+lbl:'');t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500);updateStats();}
+
+window.switchTab=function(t){currentTab=t;document.querySelectorAll('.tab').forEach(function(v){v.classList.remove('active')});var tv=document.getElementById('tab-'+t);if(tv)tv.classList.add('active');document.querySelectorAll('.snav-btn').forEach(function(b){b.classList.remove('active')});var sn=document.getElementById('snav-'+t);if(sn)sn.classList.add('active');updateStats();};
+window.showDash=function(){switchTab('dashboard');};
+window.openStreakModal=function(){document.getElementById('modal-streak-num').textContent=getStreak();document.getElementById('overlay').classList.add('show');document.getElementById('streak-modal').classList.add('show');};
+window.closeAll=function(){document.getElementById('overlay').classList.remove('show');document.getElementById('streak-modal').classList.remove('show');};
+window.toggleDarkMode=function(){var dm=document.documentElement.classList.toggle('light-mode');localStorage.setItem('awsai_darkmode',dm?'1':'0');};
+window.goToNextDay=function(){var next=1;for(var d=1;d<=20;d++){if(!completed.has(d)){next=d;break;}}goToDay(next);};
+
+var PHASES=[
+  {id:"w1",label:"Week 1: What & How of AI",days:[1,7],cls:"w1"},
+  {id:"w2",label:"Week 2: AWS Stack & Responsible AI",days:[8,14],cls:"w2"},
+  {id:"w3",label:"Week 3: Domain 3, 5 & Exam Gaps",days:[15,19],cls:"w3"},
+  {id:"fin",label:"Day 20: Final Review",days:[20,20],cls:"fin"}
+];
+
+var DAYS=[
+// ── WEEK 1: The "What" and "How" of AI ──
+{day:1,topic:"AI Terminology & Machine Learning Lifecycle",
+ links:[{label:"AWS Skill Builder: Standard Exam Prep Plan",url:"https://explore.skillbuilder.aws/learn/learning-plans"},{label:"FreeCodeCamp: ML Fundamentals",url:"https://www.youtube.com/results?search_query=freecodecamp+machine+learning+full+course"}],
+ checklist:["Review the AWS Certified AI Practitioner exam guide","Understand the ML lifecycle: business problem → data → model → evaluation → deployment","Define core AI/ML terminology: model, training, inference, features, labels","Differentiate: AI vs ML vs Deep Learning vs Generative AI","Bookmark the AWS AI services documentation page"],
+ note:"What are the differences between AI, Machine Learning, Deep Learning, and Generative AI?",
+ practice:"AI vs ML vs DL | supervised learning | unsupervised learning | ML lifecycle | inference"},
+{day:2,topic:"Supervised vs. Unsupervised Learning",
+ links:[{label:"StatQuest: Supervised Learning",url:"https://www.youtube.com/results?search_query=statquest+supervised+learning+classification+regression"},{label:"StatQuest: Unsupervised Learning",url:"https://www.youtube.com/results?search_query=statquest+unsupervised+learning+k-means+clustering"}],
+ checklist:["Watch StatQuest videos on supervised and unsupervised learning","Define supervised learning: labeled data, known output","Define unsupervised learning: unlabeled data, hidden patterns","Differentiate: regression (continuous output) vs classification (discrete output)","Identify real-world examples of clustering and anomaly detection"],
+ note:"When would you choose supervised learning over unsupervised learning? What are the key use cases for each?",
+ practice:"labeled data | regression | classification | clustering | K-means | dimensionality reduction | PCA | anomaly detection"},
+{day:3,topic:"Model Evaluation: Accuracy, Precision, Recall & Confusion Matrix",
+ links:[{label:"Confusion Matrix Explained",url:"https://www.youtube.com/results?search_query=confusion+matrix+precision+recall+accuracy+f1+score"}],
+ checklist:["Draw and label a confusion matrix (TP, TN, FP, FN)","Calculate accuracy: (TP+TN)/Total","Calculate precision: TP/(TP+FP) and recall: TP/(TP+FN)","Understand the F1-score as the harmonic mean of precision and recall","Explain the bias-variance tradeoff in simple terms"],
+ note:"Why is accuracy alone not a reliable metric when evaluating an AI model?",
+ practice:"confusion matrix | TP TN FP FN | precision | recall | F1-score | overfitting | underfitting | ROC AUC"},
+{day:4,topic:"Neural Networks & Deep Learning Fundamentals",
+ links:[{label:"3Blue1Brown: Neural Networks",url:"https://www.youtube.com/results?search_query=3blue1brown+neural+networks+deep+learning"},{label:"Computerphile: Tokens & Embeddings",url:"https://www.youtube.com/results?search_query=computerphile+tokens+embeddings+nlp"}],
+ checklist:["Watch 3Blue1Brown's neural network introduction","Understand neurons, layers, activation functions, weights, and biases","Define forward propagation and backpropagation","Learn what tokens are and why they matter for LLMs","Understand embeddings: converting words/tokens into numerical vectors"],
+ note:"What is a token in the context of LLMs? How do embeddings enable AI to understand semantic meaning?",
+ practice:"neural networks | perceptron | activation functions | backpropagation | tokens | embeddings | vector representations"},
+{day:5,topic:"Generative AI & Transformers Explained",
+ links:[{label:"Computerphile: Transformers",url:"https://www.youtube.com/results?search_query=computerphile+transformers+attention+mechanism"},{label:"3Blue1Brown: Attention in Transformers",url:"https://www.youtube.com/results?search_query=3blue1brown+attention+mechanism+transformers"}],
+ checklist:["Watch the Computerphile video on Transformers","Understand the self-attention mechanism","Define what makes a model 'generative' vs 'discriminative'","Learn about Foundation Models (FMs) and their role","Identify key transformer-based models: GPT-4, Claude, Llama, Titan"],
+ note:"What is the self-attention mechanism in Transformers, and why was it a breakthrough for Generative AI?",
+ practice:"Transformers | self-attention | generative AI | Foundation Models | GPT | Claude | Llama | Titan | pre-training vs fine-tuning"},
+{day:6,topic:"Foundation Models, Tokens & Temperature",
+ links:[{label:"AWS: Introduction to Foundation Models",url:"https://www.youtube.com/results?search_query=aws+foundation+models+bedrock"},{label:"Tokens & Temperature Explained",url:"https://www.youtube.com/results?search_query=tokens+temperature+top-p+llm+parameters"}],
+ checklist:["Define Foundation Model (FM) and how it differs from a task-specific model","Understand tokenization: how text is split into tokens for processing","Learn what temperature (0-2) controls in LLM output","Explore Top-P (nucleus sampling) and Top-K sampling","Memorize: 1 token ≈ 0.75 English words"],
+ note:"How does temperature affect the creativity and determinism of an LLM's output?",
+ practice:"Foundation Models | tokenization | temperature | Top-P | Top-K | max_tokens | context window | prompt engineering"},
+{day:7,topic:"Week 1 Review: ML Lifecycle & Gen AI Concepts",
+ links:[{label:"AWS AI Practitioner Sample Questions",url:"https://d1.awsstatic.com/training-and-certification/docs-ai-practitioner/AWS-Certified-AI-Practitioner_Sample-Questions.pdf"}],
+ checklist:["Download the official AWS AI Practitioner sample questions PDF","Review all concepts from Days 1-6","Take a 20-question self-quiz on ML fundamentals","From memory: draw the ML lifecycle","From memory: explain supervised vs unsupervised, transformers, and tokens"],
+ note:"Which concepts from Week 1 need more review? Identify your 3 weakest areas.",
+ practice:"ML lifecycle review | supervised vs unsupervised | transformers | tokens | embeddings | Foundation Models | temperature"},
+
+// ── WEEK 2: The AWS Stack & Responsible AI ──
+{day:8,topic:"Amazon Bedrock: The Heart of the AWS AI Exam",
+ links:[{label:"AWS Bedrock Documentation",url:"https://docs.aws.amazon.com/bedrock/"},{label:"AWS Bedrock Use Cases",url:"https://www.youtube.com/results?search_query=aws+bedrock+tutorial+use+cases"}],
+ checklist:["Read the AWS Bedrock overview documentation","Understand: Bedrock accesses Foundation Models via API (Claude, Llama, Titan)","Learn key Bedrock features: knowledge bases, agents, guardrails","No need to manage infrastructure — fully managed service","Explore Bedrock use cases: text generation, summarization, chatbots"],
+ note:"What is Amazon Bedrock and how does it differ from training models yourself on SageMaker?",
+ practice:"Amazon Bedrock | Foundation Models | API access | knowledge bases | agents | guardrails | Claude | Llama | Titan"},
+{day:9,topic:"Amazon SageMaker for Building & Training Models",
+ links:[{label:"SageMaker 10-Minute Tutorial",url:"https://www.youtube.com/results?search_query=aws+sagemaker+tutorial+10+minutes"},{label:"SageMaker Documentation",url:"https://docs.aws.amazon.com/sagemaker/"}],
+ checklist:["Review the SageMaker documentation","Understand SageMaker Studio: unified IDE for ML","Learn SageMaker Ground Truth: human data labeling for training","Differentiate SageMaker vs Bedrock: build/train vs access pre-built","Explore SageMaker Canvas: no-code ML for business analysts"],
+ note:"When would you use SageMaker instead of Bedrock? What is Ground Truth used for?",
+ practice:"SageMaker Studio | Ground Truth | human data labeling | SageMaker Canvas | no-code ML | model hosting"},
+{day:10,topic:"Amazon Q & AI-Powered Assistants",
+ links:[{label:"Amazon Q Documentation",url:"https://aws.amazon.com/q/"},{label:"Amazon Q Business Introduction",url:"https://www.youtube.com/results?search_query=amazon+q+business+ai+assistant"}],
+ checklist:["Learn what Amazon Q is: generative AI assistant for business/developers","Understand Amazon Q Developer: code generation, debugging, security scanning","Explore Amazon Q Business: enterprise knowledge base assistant","Compare Amazon Q vs general LLMs (ChatGPT) — enterprise data integration","Learn about Amazon Q in Connect for customer service"],
+ note:"How does Amazon Q differ from a general-purpose LLM like ChatGPT? What makes it enterprise-ready?",
+ practice:"Amazon Q | Amazon Q Developer | Amazon Q Business | enterprise AI assistant | CodeWhisperer | enterprise knowledge base"},
+{day:11,topic:"AWS AI Services: Rekognition & Comprehend",
+ links:[{label:"Amazon Rekognition Overview",url:"https://www.youtube.com/results?search_query=amazon+rekognition+tutorial"},{label:"Amazon Comprehend Tutorial",url:"https://www.youtube.com/results?search_query=amazon+comprehend+nlp+tutorial"}],
+ checklist:["Learn Amazon Rekognition: image/video analysis — face detection, object detection, content moderation","Explore Rekognition use cases: security, media analysis, retail","Learn Amazon Comprehend: NLP — sentiment analysis, entity recognition, topic modeling","Understand Comprehend Medical: PHI extraction from clinical text","Build a mental map of which service to use for which task"],
+ note:"When would you use Rekognition vs a custom model on SageMaker for image analysis?",
+ practice:"Rekognition | face detection | object detection | Comprehend | sentiment analysis | entity recognition | PII detection | NLP"},
+{day:12,topic:"AWS HealthScribe & Specialized AI Services",
+ links:[{label:"AWS HealthScribe Overview",url:"https://www.youtube.com/results?search_query=aws+healthscribe+clinical+notes"},{label:"AWS AI Services Overview",url:"https://www.youtube.com/results?search_query=aws+ai+services+overview+2024"}],
+ checklist:["Learn AWS HealthScribe: automatically creates clinical notes from patient-doctor conversations","Explore Amazon Transcribe: speech-to-text","Explore Amazon Polly: text-to-speech","Learn Amazon Translate: language translation","Understand Amazon Kendra: intelligent enterprise search"],
+ note:"What specific healthcare problem does HealthScribe solve? How does it handle PHI?",
+ practice:"HealthScribe | clinical notes | Transcribe | Polly | Translate | Kendra | PHI compliance | specialized AI services"},
+{day:13,topic:"Responsible AI: Principles & Ethical Guidelines",
+ links:[{label:"Google Cloud Tech: Responsible AI (concepts apply to AWS)",url:"https://www.youtube.com/results?search_query=google+cloud+tech+responsible+ai"},{label:"AWS Responsible AI",url:"https://www.youtube.com/results?search_query=aws+responsible+ai+fairness+transparency"}],
+ checklist:["Learn the core Responsible AI principles: fairness, transparency, explainability, privacy, security, accountability","Understand AI bias: training data bias, algorithmic bias, societal bias","Define explainability vs interpretability in AI models","Learn about AI governance and compliance frameworks","Review the AWS Responsible AI approach"],
+ note:"What are the 6 core principles of Responsible AI? Give an example of bias in AI and how to mitigate it.",
+ practice:"Responsible AI | fairness | transparency | explainability | privacy | accountability | AI bias | algorithmic bias | governance"},
+{day:14,topic:"AI Hallucinations, Guardrails & AWS AI Ethics",
+ links:[{label:"AI Hallucinations Explained",url:"https://www.youtube.com/results?search_query=ai+hallucinations+explained+llm"},{label:"AWS Guardrails: Bedrock",url:"https://www.youtube.com/results?search_query=aws+bedrock+guardrails+responsible"}],
+ checklist:["Define AI hallucination: confidently false or misleading output","Understand causes: insufficient training data, prompt ambiguity, model limitations","Learn mitigation: RAG, grounding, prompt engineering, guardrails","Explore AWS Guardrails for Amazon Bedrock: filters for toxic content and PII","Review the AWS AI Service Cards for transparency documentation"],
+ note:"What are AI hallucinations and how do AWS Guardrails help prevent them in production?",
+ practice:"AI hallucinations | RAG grounding | Bedrock Guardrails | content filtering | PII protection | Service Cards | transparency"},
+
+// ── WEEK 3: Domain 3, 5 & Exam Gaps ──
+{day:15,topic:"Prompt Engineering Techniques",
+ links:[{label:"AWS: Prompt Engineering Best Practices",url:"https://www.youtube.com/results?search_query=aws+bedrock+prompt+engineering+techniques"},{label:"Chain-of-Thought Prompting Explained",url:"https://www.youtube.com/results?search_query=chain+of+thought+prompting+explained"}],
+ checklist:["Define zero-shot, one-shot, and few-shot prompting with examples","Understand chain-of-thought (CoT) prompting for complex reasoning tasks","Learn negative prompts: telling the model what NOT to do","Identify prompt risks: injection, jailbreaking, hijacking, poisoning","Explore Amazon Bedrock Prompt Management and prompt templates"],
+ note:"What is the difference between zero-shot and few-shot prompting? When would chain-of-thought be most useful?",
+ practice:"zero-shot | one-shot | few-shot | chain-of-thought | negative prompts | prompt injection | jailbreaking | prompt hijacking | prompt poisoning | Bedrock Prompt Management"},
+{day:16,topic:"Bedrock Agents, Knowledge Bases & Model Evaluation",
+ links:[{label:"Amazon Bedrock Agents Overview",url:"https://www.youtube.com/results?search_query=amazon+bedrock+agents+tutorial"},{label:"Bedrock Model Evaluation",url:"https://www.youtube.com/results?search_query=amazon+bedrock+model+evaluation"}],
+ checklist:["Understand Amazon Bedrock Agents: orchestrating multi-step tasks with tools and APIs","Learn Amazon Bedrock Knowledge Bases: managed RAG with vector stores","Identify vector database options: OpenSearch, Aurora, Neptune, RDS for PostgreSQL","Understand Amazon Bedrock Model Evaluation: human and automated FM evaluation","Learn FM evaluation metrics: ROUGE, BLEU, BERTScore — what they measure"],
+ note:"What is the role of Bedrock Agents in agentic AI? How does a Knowledge Base differ from a plain RAG implementation?",
+ practice:"Bedrock Agents | agentic AI | multi-step tasks | Knowledge Bases | vector databases | OpenSearch | Amazon Bedrock Model Evaluation | ROUGE | BLEU | BERTScore"},
+{day:17,topic:"FM Customization: Fine-Tuning, RLHF & Cost Tradeoffs",
+ links:[{label:"Fine-Tuning vs RAG vs Prompting",url:"https://www.youtube.com/results?search_query=fine+tuning+vs+rag+vs+prompt+engineering+llm"},{label:"RLHF Explained",url:"https://www.youtube.com/results?search_query=reinforcement+learning+human+feedback+RLHF+explained"}],
+ checklist:["Compare FM customisation approaches: pre-training vs fine-tuning vs RAG vs in-context learning","Understand instruction tuning and domain adaptation as fine-tuning methods","Define RLHF (Reinforcement Learning from Human Feedback) and its role in FM alignment","Understand continuous pre-training and knowledge distillation","Identify when each approach is cost-effective vs impractical"],
+ note:"What are the cost and data tradeoffs between fine-tuning, RAG, and few-shot prompting? Which requires the most compute?",
+ practice:"pre-training | fine-tuning | instruction tuning | RLHF | continuous pre-training | distillation | RAG | in-context learning | cost tradeoffs | SageMaker JumpStart"},
+{day:18,topic:"Security & Governance for AI Solutions",
+ links:[{label:"AWS AI Security Best Practices",url:"https://www.youtube.com/results?search_query=aws+ai+security+compliance+governance"},{label:"AWS Shared Responsibility Model for AI",url:"https://www.youtube.com/results?search_query=aws+shared+responsibility+model+ai+ml"}],
+ checklist:["Understand AWS shared responsibility model applied to AI/ML workloads","Learn IAM roles, policies, and permissions for securing AI services","Understand prompt injection as a security attack — how it differs from prompt engineering","Explore Amazon Macie for PII/sensitive data discovery in S3","Learn AWS PrivateLink for private connectivity to Bedrock and SageMaker","Understand encryption at rest and in transit for AI workloads","Review data lineage, data cataloging, and SageMaker Model Cards for governance"],
+ note:"Who is responsible for securing data fed into Bedrock under the shared responsibility model? What is the difference between prompt injection as a security attack vs a prompt engineering technique?",
+ practice:"shared responsibility model | IAM for AI | Amazon Macie | AWS PrivateLink | prompt injection attack | encryption at rest | encryption in transit | data lineage | SageMaker Model Cards"},
+{day:19,topic:"Compliance, Governance Tools & SageMaker Monitoring",
+ links:[{label:"AWS Compliance for AI Services",url:"https://www.youtube.com/results?search_query=aws+compliance+governance+ai+audit+manager"},{label:"SageMaker Clarify & Model Monitor",url:"https://www.youtube.com/results?search_query=sagemaker+clarify+bias+detection+model+monitor"}],
+ checklist:["Learn AWS Config: track resource configuration changes for compliance","Understand AWS Audit Manager: automate audit evidence collection","Explore AWS Artifact: access compliance reports and agreements","Learn AWS CloudTrail: log all API calls for AI services (audit trail)","Understand Amazon Inspector: automated security vulnerability assessment","Learn SageMaker Clarify: detect bias in training data and model predictions","Understand SageMaker Model Monitor: detect data drift and model degradation in production","Learn Amazon Augmented AI (A2I): human review loops for low-confidence AI predictions"],
+ note:"Which AWS service would you use to prove compliance to an auditor? What does SageMaker Clarify detect that Model Monitor does not?",
+ practice:"AWS Config | AWS Audit Manager | AWS Artifact | AWS CloudTrail | Amazon Inspector | SageMaker Clarify | SageMaker Model Monitor | Amazon A2I | data drift | bias detection"},
+// ── DAY 20: Final Review ──
+{day:20,topic:"Final Review: AWS AI Practitioner Exam Readiness",
+ links:[{label:"AWS AI Practitioner Sample Questions PDF",url:"https://d1.awsstatic.com/training-and-certification/docs-ai-practitioner/AWS-Certified-AI-Practitioner_Sample-Questions.pdf"},{label:"AWS Skill Builder: Practice Exams",url:"https://explore.skillbuilder.aws/learn/course/exam-prep-aws-certified-ai-practitioner"}],
+ checklist:["Take all 7 practice test sets in this app (aim for 80%+ on each)","Review the full Cheat Sheet in the Notes tab — memorize all services","From memory: name all 5 exam domains and their weightings","From memory: list prompt engineering techniques and their prompt risks","From memory: list all Domain 5 governance tools (Config, Audit Manager, Artifact, CloudTrail, Inspector)"],
+ note:"What are your 3 weakest areas after all practice tests? Domain 3 (28%) and Domain 5 (14%) are most commonly missed — focus there.",
+ practice:"FINAL REVIEW | all 5 domains | Bedrock | SageMaker | prompt engineering | security | governance | Responsible AI | MLOps | ROUGE | BLEU | Clarify | A2I"}
+];
+
+// ── TESTS (5 sets, 15 questions each = 75 total) ──────────────────
+var ALL_TESTS=[
+{title:"Set 1: AI & ML Fundamentals",questions:[
+{q:"Which type of learning uses labeled data to train models?",opts:["Unsupervised learning","Supervised learning","Reinforcement learning","Generative AI"],ans:1,exp:"Supervised learning uses labeled data (input→output pairs) to learn mappings. Unsupervised uses unlabeled data."},
+{q:"Which metric is the harmonic mean of precision and recall?",opts:["Accuracy","ROC AUC","F1-score","RMSE"],ans:2,exp:"F1-score balances precision and recall. Accuracy = correct/total. ROC AUC measures classification threshold performance."},
+{q:"What does a confusion matrix display?",opts:["Model architecture","Feature importance","Training loss over epochs","TP, TN, FP, FN counts"],ans:3,exp:"Confusion matrix shows: True Positives, True Negatives, False Positives, False Negatives. Foundation for calculating precision/recall."},
+{q:"In ML lifecycle, which phase comes right AFTER training?",opts:["Model evaluation","Business problem definition","Data collection","Feature engineering"],ans:0,exp:"ML lifecycle: business problem → data → feature engineering → training → evaluation → deployment → monitoring."},
+{q:"What is the primary goal of dimensionality reduction (e.g., PCA)?",opts:["Increase features","Improve accuracy always","Reduce features while preserving variance","Add noise to data"],ans:2,exp:"PCA reduces feature count while retaining maximum variance. Helps with visualization, noise reduction, and computational efficiency."},
+{q:"Which is an example of unsupervised learning?",opts:["Spam detection","K-means customer segmentation","Customer churn prediction","House price prediction"],ans:1,exp:"Clustering (K-means) groups unlabeled data. Spam/churn/price prediction use labeled data = supervised learning."},
+{q:"What is overfitting in ML?",opts:["Model too simple","Model has too few parameters","Model is too fast","Model performs well on training data but poorly on new data"],ans:3,exp:"Overfitting: model memorizes training data patterns but fails to generalize. Underfitting: model too simple to capture patterns."},
+{q:"What does a neuron in a neural network compute?",opts:["Weighted sum of inputs passed through an activation function","Only binary output","Raw input data","Random values"],ans:0,exp:"Neuron: weighted sum of inputs + bias → activation function (ReLU, sigmoid, etc.). Multiple neurons form layers."},
+{q:"What is backpropagation?",opts:["Forward data flow","Algorithm to compute gradients for weight updates","Generating new data","Deploying a model"],ans:1,exp:"Backpropagation: compute error gradient at each layer. Enables weight update via gradient descent. Essential for neural network training."},
+{q:"Which AWS service provides pre-trained models via API without managing infrastructure?",opts:["Amazon SageMaker","Amazon EC2","AWS Lambda","Amazon Bedrock"],ans:3,exp:"Bedrock provides API access to Foundation Models (Claude, Llama, Titan). SageMaker is for building/training custom models."},
+{q:"What is the primary metric for regression problems?",opts:["Accuracy","Precision","RMSE (Root Mean Squared Error)","F1-score"],ans:2,exp:"RMSE measures average prediction error magnitude for continuous outputs (regression). For classification, use accuracy/precision/recall/F1."},
+{q:"What does 'temperature' control in an LLM?",opts:["Response creativity/randomness","Model size","Training time","API cost"],ans:0,exp:"Temperature (0-2): lower = more deterministic/factual. Higher = more creative/random. 0 typically produces consistent outputs."},
+{q:"Approximately how many English words does 1 token represent?",opts:["0.1 words","10 words","5 words","0.75 words"],ans:3,exp:"1 token ≈ 0.75 English words. ~100 tokens ≈ 75 words. Token counting is essential for API cost estimation and context window management."},
+{q:"What is a Foundation Model (FM)?",opts:["A model trained from scratch for one task","A large pre-trained model usable for many downstream tasks","A simple statistical model","A hardware component"],ans:1,exp:"Foundation Models are large-scale pre-trained models (GPT-4, Claude, Llama) that can be fine-tuned or prompted for diverse tasks."},
+{q:"Which term describes splitting text into smaller units for LLM processing?",opts:["Embedding","Normalization","Tokenization","Backpropagation"],ans:2,exp:"Tokenization breaks text into tokens (words, subwords, or characters). Each token gets a numerical ID for model processing."}
+]},
+{title:"Set 2: AWS AI Services",questions:[
+{q:"Which AWS service allows you to build, train, and deploy custom ML models?",opts:["Amazon SageMaker","Amazon Bedrock","Amazon Rekognition","Amazon Comprehend"],ans:0,exp:"SageMaker is the full ML platform: Studio IDE, training jobs, model hosting, Ground Truth for labeling. Bedrock accesses pre-built FMs."},
+{q:"What does SageMaker Ground Truth provide?",opts:["Model deployment","Human data labeling for training datasets","Automatic model tuning","API gateway"],ans:1,exp:"Ground Truth uses human annotators (internal workforce, Mechanical Turk, or labeling vendors) to label data for supervised learning."},
+{q:"Which service provides image and video analysis including face detection?",opts:["Amazon Comprehend","Amazon Polly","Amazon Rekognition","Amazon Transcribe"],ans:2,exp:"Rekognition: pre-trained computer vision. Face detection, object/scene detection, content moderation, celebrity recognition, text in images."},
+{q:"Amazon Comprehend is used for:",opts:["Computer vision","Translation","Speech-to-text","Natural Language Processing (NLP)"],ans:3,exp:"Comprehend: NLP service. Sentiment analysis, entity recognition, key phrase extraction, topic modeling, PII detection, and Comprehend Medical."},
+{q:"What does Amazon Q provide for developers?",opts:["AI code generation, debugging, and security scanning","Database management","Network configuration","Storage optimization"],ans:0,exp:"Amazon Q Developer (formerly CodeWhisperer): AI coding companion. Generates code, scans for vulnerabilities, suggests fixes, and helps with AWS architecture."},
+{q:"Which service automatically generates clinical notes from patient-doctor conversations?",opts:["Amazon Transcribe","Amazon Comprehend Medical","AWS HealthScribe","Amazon Bedrock"],ans:2,exp:"HealthScribe: combines speech recognition and generative AI to create structured clinical notes from audio, handling PHI with HIPAA compliance."},
+{q:"Amazon Polly is a:",opts:["Speech-to-text service","Text-to-speech service","Translation service","Chatbot service"],ans:1,exp:"Polly converts text to lifelike speech. Multiple voices and languages. Transcribe is speech-to-text. Translate is language translation."},
+{q:"Which service would you use for sentiment analysis of customer reviews?",opts:["Amazon Rekognition","AWS HealthScribe","Amazon SageMaker","Amazon Comprehend"],ans:3,exp:"Comprehend provides pre-trained sentiment analysis (positive/negative/neutral/mixed). Also detects entities, key phrases, and language."},
+{q:"What is a key difference between SageMaker and Bedrock?",opts:["SageMaker: build/train custom models. Bedrock: API access to pre-built Foundation Models","No difference","Bedrock is for image analysis","SageMaker is only for NLP"],ans:0,exp:"SageMaker = build your own models (full control). Bedrock = use pre-built FMs via API (faster, less control). Different use cases."},
+{q:"Amazon Kendra is:",opts:["An NLP service","An intelligent enterprise search service","A speech recognition service","A model training service"],ans:1,exp:"Kendra: ML-powered search. Indexes enterprise data (documents, wikis, databases) and provides natural language search with high relevance."},
+{q:"What does Amazon Transcribe do?",opts:["Converts text to speech","Analyzes images","Translates between languages","Converts speech to text"],ans:3,exp:"Transcribe: automatic speech recognition (ASR). Converts audio to text. Supports multiple languages, speaker diarization, and custom vocabularies."},
+{q:"SageMaker Canvas is designed for:",opts:["ML engineers only","Database administrators","Business analysts — no-code ML model building","Network engineers"],ans:2,exp:"Canvas: visual, no-code ML. Business analysts can build models by uploading data, selecting target column, and letting Canvas auto-train."},
+{q:"Which service uses the self-attention mechanism through Foundation Models?",opts:["Amazon Bedrock","Amazon Rekognition","AWS Lambda","Amazon S3"],ans:0,exp:"Bedrock serves Foundation Models (Claude, Llama, Titan) which are transformer-based and use self-attention. This is the core Gen AI technology."},
+{q:"What differentiates Amazon Q Business from general LLMs?",opts:["It's cheaper","It requires no setup","It only works on mobile","It integrates with enterprise data sources for context-aware responses"],ans:3,exp:"Q Business connects to enterprise data (S3, SharePoint, Salesforce, etc.) and provides answers grounded in YOUR company's data. More secure than public LLMs."},
+{q:"What is the primary purpose of SageMaker Studio?",opts:["Database hosting","Unified IDE for the complete ML workflow","Network monitoring","Cost optimization"],ans:1,exp:"Studio: integrated development environment covering data prep, model training, tuning, deployment, and monitoring. One-stop ML workspace."}
+]},
+{title:"Set 3: Generative AI & Foundation Models",questions:[
+{q:"What is a token in the context of LLMs?",opts:["A security credential","An API endpoint","A unit of text processed by the model","A type of database"],ans:2,exp:"Tokens are the basic units LLMs process. Words, subwords, or characters. Token limits determine context window size and API pricing."},
+{q:"Which transformer-based architecture is used by most modern LLMs?",opts:["Self-attention based Transformer","CNN (Convolutional Neural Network)","RNN (Recurrent Neural Network)","Decision trees"],ans:0,exp:"Transformers with self-attention replaced RNNs/CNNs for NLP. Enables parallel processing and long-range context. GPT, Claude, Llama all use Transformers."},
+{q:"What does the self-attention mechanism allow a model to do?",opts:["Focus only on the first word","Weigh the importance of different words in context","Speed up inference 100x","Delete irrelevant data"],ans:1,exp:"Self-attention: each word 'attends' to all other words, learning contextual relationships. 'Bank' in 'river bank' vs 'bank account' gets different attention."},
+{q:"What is a Foundation Model (FM) in the context of AWS?",opts:["A model trained on only one dataset","A simple statistical model","A large pre-trained model adaptable to multiple downstream tasks","An AWS-specific hardware component"],ans:2,exp:"FMs: massive models pre-trained on diverse data. Adaptable via fine-tuning or prompting. Bedrock provides access to multiple FMs (Claude, Llama, Titan)."},
+{q:"Which AWS service provides Foundation Models via API?",opts:["Amazon SageMaker","AWS Lambda","Amazon EC2","Amazon Bedrock"],ans:3,exp:"Bedrock: API access to FMs. No infrastructure management. Supports Claude (Anthropic), Llama (Meta), Titan (AWS), and more."},
+{q:"What is the purpose of prompting in Gen AI?",opts:["Provide input instructions to guide the model's output","Delete model weights","Train the model","Deploy the model"],ans:0,exp:"Prompts: natural language instructions that guide FM behavior. Prompt engineering = crafting effective prompts for desired outputs."},
+{q:"What differentiates generative AI from discriminative AI?",opts:["No difference","Discriminative is newer","Generative: creates new content. Discriminative: classifies existing data","Generative only works on images"],ans:2,exp:"Generative AI (GPT, DALL-E) creates new content. Discriminative AI classifies or predicts based on existing data. Both are ML subsets."},
+{q:"What is RAG (Retrieval-Augmented Generation)?",opts:["A database technology","Augmenting LLM prompts with retrieved external data for grounded responses","A training technique","An AWS service"],ans:1,exp:"RAG: retrieve relevant documents from a knowledge base → include in prompt → LLM generates grounded, factual response. Reduces hallucinations."},
+{q:"What does 'context window' refer to in LLMs?",opts:["A UI element","The model's file size","A training parameter","The maximum number of tokens the model can process in one prompt"],ans:3,exp:"Context window: max tokens a model can 'see' at once (input + output). Larger windows allow longer documents/conversations but cost more."},
+{q:"Which of these is NOT a Foundation Model available via Amazon Bedrock?",opts:["GPT-4 (OpenAI)","Llama (Meta)","Claude (Anthropic)","Titan (AWS)"],ans:0,exp:"GPT-4 is NOT available via Bedrock. Bedrock offers: Claude, Llama, Titan, Jurassic, Command, Stable Diffusion, and more. GPT-4 is via Azure/OpenAI."},
+{q:"What is fine-tuning?",opts:["Training from scratch","Taking a pre-trained model and training it further on specific data","Model deployment","API configuration"],ans:1,exp:"Fine-tuning: adapt a pre-trained FM to a specific domain/task using additional training data. Less data needed than training from scratch."},
+{q:"What does Top-P (nucleus sampling) control?",opts:["Model architecture","API pricing","Training speed","The cumulative probability threshold for token selection"],ans:3,exp:"Top-P: samples from smallest set of tokens whose cumulative probability ≥ P. Lower P = more focused. Higher P = more diverse. Balances with temperature."},
+{q:"What is an embedding in NLP?",opts:["A physical component","A type of model","A numerical vector representation of a word/token","An API call"],ans:2,exp:"Embeddings: dense numerical vectors capturing semantic meaning. Similar words have similar vectors. Enable: search, clustering, recommendation systems."},
+{q:"Which AWS service uses human annotators to label data for ML training?",opts:["SageMaker Ground Truth","Amazon Bedrock","Amazon Comprehend","AWS Lambda"],ans:0,exp:"Ground Truth: human-in-the-loop data labeling. Provides labeled datasets for supervised learning. Uses Mechanical Turk or vendor workforces."},
+{q:"What is the primary advantage of using Bedrock over self-hosting Foundation Models?",opts:["No advantage","It's faster for training new models","It's always free","No infrastructure management, pay-per-use, enterprise security, and governance built-in"],ans:3,exp:"Bedrock: fully managed. No need to provision GPUs, handle scaling, or manage security. Enterprise features: VPC, IAM, CloudTrail, guardrails."}
+]},
+{title:"Set 4: Responsible AI & Governance",questions:[
+{q:"Which is NOT a core principle of Responsible AI?",opts:["Fairness","Profitability","Transparency","Accountability"],ans:1,exp:"Core RAI principles: fairness, transparency, explainability, privacy, security, accountability. Profitability is a business goal, not an ethics principle."},
+{q:"What is AI bias?",opts:["AI that runs slowly","AI with too many parameters","Systematic and unfair discrimination in AI outputs","AI that uses too much data"],ans:2,exp:"AI bias: systematic unfairness in model predictions. Sources: biased training data, flawed assumptions, or societal biases reflected in data."},
+{q:"What are AWS Bedrock Guardrails?",opts:["Configurable filters to block toxic content and PII in AI outputs","Physical security barriers","Network firewalls","Database access controls"],ans:0,exp:"Bedrock Guardrails: configurable safety filters. Block: hate speech, violence, sexual content, PII leakage. Ensures responsible AI deployment."},
+{q:"What is an AI hallucination?",opts:["A visual glitch","Confidently stated but false or misleading AI output","A training technique","A model architecture"],ans:1,exp:"Hallucination: AI generates content that sounds plausible but is factually wrong. Caused by: insufficient training data, prompt ambiguity, or model limitations."},
+{q:"How can RAG (Retrieval-Augmented Generation) reduce hallucinations?",opts:["It can't","Makes models smaller","Grounds responses in retrieved documents, providing factual basis","Increases temperature"],ans:2,exp:"RAG retrieves relevant documents before generating response. The LLM's output is grounded in retrieved facts, reducing fabrication."},
+{q:"What does AWS AI Service Cards provide?",opts:["API pricing","Service comparisons","Discount codes","Transparency documentation about service capabilities, limitations, and intended use"],ans:3,exp:"Service Cards: transparency docs describing AI service functionality, use cases, limitations, and responsible AI considerations. Helps customers make informed decisions."},
+{q:"Which concept refers to the ability to understand how an AI model made a decision?",opts:["Explainability","Accuracy","Latency","Throughput"],ans:0,exp:"Explainability: understanding WHY a model made a particular prediction. Critical for trust, debugging bias, and regulatory compliance (e.g., GDPR 'right to explanation')."},
+{q:"What is PII in the context of AI guardrails?",opts:["Public Internet Infrastructure","Process Input Interface","Personally Identifiable Information","Private Internal Integration"],ans:2,exp:"PII: data that identifies individuals (names, SSN, email, phone). AI guardrails must prevent PII leakage in model outputs for privacy compliance."},
+{q:"What is the primary mitigation strategy for AI bias introduced by training data?",opts:["Ignore the problem","Ensure diverse, representative training data and test for fairness across groups","Use only one data source","Reduce model size"],ans:1,exp:"Mitigate bias: diverse + representative data, fairness metrics across demographic groups, bias audits, and adversarial testing. Data quality matters."},
+{q:"Which AWS service helps detect and filter PII in text?",opts:["Amazon Rekognition","Amazon Transcribe","Amazon Polly","Amazon Comprehend (PII detection)"],ans:3,exp:"Comprehend detects PII: names, SSN, addresses, credit card numbers, etc. Bedrock Guardrails also provides PII filtering for generative outputs."},
+{q:"What is the relationship between fairness and accuracy in AI?",opts:["Fairness ensures accuracy is evenly distributed across groups; high overall accuracy can mask group disparities","They're identical","Fairness reduces accuracy","No relationship"],ans:0,exp:"A model can be 95% accurate overall but 60% accurate for a minority group. Fairness requires examining accuracy/perf across all affected groups."},
+{q:"What documentation does AWS provide for transparency of its AI services?",opts:["No documentation","AI Service Cards","Only API references","Marketing materials"],ans:1,exp:"AWS provides AI Service Cards for: Rekognition, Comprehend, Transcribe, Polly, and others. Each card details capabilities, limitations, and responsible AI guidance."},
+{q:"What type of content would Bedrock Guardrails typically block?",opts:["All content","Only code","Only spam","Hate speech, violence, sexually explicit content, and PII"],ans:3,exp:"Guardrails configurable topics: hate, insults, sexual content, violence, misconduct. Also: prompt attacks (injection), PII, and custom denied topics."},
+{q:"What is model interpretability?",opts:["The ability to read model code","How fast the model runs","The degree to which a human can understand the cause of a model's decision","Model file size"],ans:2,exp:"Interpretability: understanding how model inputs lead to outputs. Different from explainability (post-hoc). Simpler models (decision trees) are more interpretable."},
+{q:"Why is accountability important in Responsible AI?",opts:["Ensures clear ownership and responsibility for AI decisions and their consequences","It's not important","Only for legal teams","Only for developers"],ans:0,exp:"Accountability: who is responsible when AI causes harm? Clear ownership, audit trails, and redress mechanisms are essential for responsible deployment."}
+]},
+{title:"Set 5: Mixed AWS AI Practitioner Exam Simulation",questions:[
+{q:"A company wants to generate product descriptions from catalog data. Which AWS service should they use?",opts:["Amazon Rekognition","Amazon S3","AWS Lambda","Amazon Bedrock"],ans:3,exp:"Bedrock: text generation via Foundation Models. Feed catalog data as prompt → generate descriptions. Can use Claude or Titan models."},
+{q:"What is the primary purpose of SageMaker Ground Truth?",opts:["Model deployment","Human annotation of training data","Cost optimization","Monitoring"],ans:1,exp:"Ground Truth: human labeling of data for supervised learning. Critical when you need high-quality labeled datasets but lack them."},
+{q:"A model achieves 99% accuracy but 60% recall. What does this suggest?",opts:["Model is perfect","Model is overfitting","Model may be missing many positive cases (high false negatives)","No issue"],ans:2,exp:"High accuracy + low recall = many false negatives. The model is correctly identifying negatives but missing positives. Check precision/recall balance."},
+{q:"Which AWS service provides pre-trained computer vision capabilities?",opts:["Amazon Rekognition","Amazon Comprehend","Amazon Bedrock","AWS HealthScribe"],ans:0,exp:"Rekognition: pre-trained CV. Face detection, object/scene detection, content moderation, text extraction, celebrity recognition. API-based, no training required."},
+{q:"What is the primary benefit of using self-attention in Transformers?",opts:["Reduces model size","Enables the model to weigh contextual relationships between all words in a sequence","Eliminates the need for training","Increases latency"],ans:1,exp:"Self-attention: each token attends to all others. Enables capturing long-range dependencies and context. Key innovation behind modern LLMs."},
+{q:"What does Amazon Q Developer provide for AWS development?",opts:["Database hosting","Network routing","AI-powered code generation, security scanning, and architectural guidance","Storage management"],ans:2,exp:"Q Developer (formerly CodeWhisperer): generates code, identifies security vulnerabilities, suggests remediation, and helps with AWS best practices."},
+{q:"A healthcare company needs to convert doctor-patient audio into structured clinical notes. Which service?",opts:["Amazon Transcribe","Amazon Bedrock","Amazon Comprehend","AWS HealthScribe"],ans:3,exp:"HealthScribe: specifically designed for clinical note generation. Combines ASR + Gen AI. HIPAA-eligible. Outputs structured clinical summaries."},
+{q:"What is the primary mitigation for AI hallucinations in production applications?",opts:["Use RAG + guardrails + human review for critical outputs","Ignore them","Increase temperature","Remove all training data"],ans:0,exp:"Mitigation: RAG for factual grounding, Bedrock Guardrails to block unsafe content, prompt engineering to constrain outputs, and human review for high-stakes decisions."},
+{q:"Which Responsible AI principle ensures that diverse groups are treated equitably by AI systems?",opts:["Explainability","Latency","Fairness","Scalability"],ans:2,exp:"Fairness: AI systems should not discriminate against individuals or groups. Requires: diverse data, fairness metrics, bias testing, and ongoing monitoring."},
+{q:"What is the purpose of embeddings in NLP?",opts:["Speed up processing","Represent words/tokens as numerical vectors capturing semantic meaning","Delete data","Increase model size"],ans:1,exp:"Embeddings: dense vectors where similar concepts are close in vector space. Foundation for: semantic search, clustering, recommendation, and Gen AI context."},
+{q:"A startup wants to build a customer support chatbot using existing Foundation Models. Best AWS service?",opts:["SageMaker (build from scratch)","AWS Lambda alone","Amazon Rekognition","Amazon Bedrock (API access to FMs with knowledge base integration)"],ans:3,exp:"Bedrock: fastest path to Chatbot. API access to FMs + Knowledge Bases for company docs + Agents for orchestration. No model training needed."},
+{q:"What is the difference between SageMaker and Bedrock for ML workloads?",opts:["SageMaker: build/train custom models. Bedrock: use pre-built Foundation Models via API","No difference","Bedrock is only for images","SageMaker is faster"],ans:0,exp:"SageMaker = full control over model building (training, tuning, hosting). Bedrock = leverage pre-trained FMs without managing infrastructure. Different use cases."},
+{q:"What are tokens in the context of LLM pricing?",opts:["API credentials","Units of text processed; pricing is per 1K/1M tokens","Free credits","Database entries"],ans:1,exp:"LLM pricing is token-based. You pay for: input tokens (your prompt) + output tokens (model's response). Token counting tools help estimate costs."},
+{q:"Which AWS service helps customers understand the capabilities and limitations of AWS AI services?",opts:["AWS Documentation only","AWS whitepapers","AWS Support tickets","AI Service Cards"],ans:3,exp:"AI Service Cards: dedicated transparency documentation for each AI service. Details: intended uses, limitations, fairness considerations, and responsible AI guidance."},
+{q:"A model shows 70% accuracy for Group A but 95% accuracy for Group B. This indicates:",opts:["Good model performance","Normal variation — ignore","Potential fairness/bias issue requiring investigation","The model is broken"],ans:2,exp:"Significant performance disparity across groups = potential bias. Investigate: training data balance, feature representation, and whether the metric gap harms the affected group."}
+]}
+,{title:"Set 6: Prompt Engineering & FM Applications (Domain 3)",questions:[
+{q:"What is zero-shot prompting?",opts:["Asking the model to complete a task with no examples","Providing many examples in the prompt","A technique to reduce token count","A type of fine-tuning"],ans:0,exp:"Zero-shot: prompt provides only the task instruction, no examples. The FM uses its pre-trained knowledge to respond. Works well for simple tasks."},
+{q:"Which prompting technique includes examples of input-output pairs to guide the model?",opts:["Zero-shot","Chain-of-thought","Negative prompting","Few-shot"],ans:3,exp:"Few-shot prompting includes 2-5 input/output examples in the prompt. Helps the model understand the desired format and reasoning style."},
+{q:"What does chain-of-thought (CoT) prompting encourage the model to do?",opts:["Respond faster","Show intermediate reasoning steps before giving the final answer","Use fewer tokens","Ignore prior context"],ans:1,exp:"CoT prompting (e.g. 'think step by step') elicits intermediate reasoning. Significantly improves performance on math, logic, and multi-step tasks."},
+{q:"What is a negative prompt?",opts:["A prompt that causes errors","A low-temperature setting","Instructions telling the model what NOT to include or do in its response","A fine-tuning technique"],ans:2,exp:"Negative prompts constrain the model's output by specifying what to avoid. Example: 'Do not include disclaimers. Do not use bullet points.' Reduces unwanted patterns."},
+{q:"Which attack involves injecting malicious instructions into a prompt to override the model's intended behavior?",opts:["Prompt injection","Data poisoning","Model theft","Hallucination"],ans:0,exp:"Prompt injection: adversarial input that hijacks the model's instructions. Example: user input overrides system prompt. Mitigated by input validation and guardrails."},
+{q:"What is prompt jailbreaking?",opts:["A technique to improve model speed","Crafting inputs to bypass safety guidelines and extract restricted behavior","A data labeling method","A fine-tuning approach"],ans:1,exp:"Jailbreaking: prompts designed to trick the model into ignoring its safety guidelines. Mitigated by Bedrock Guardrails and robust system prompts."},
+{q:"Which AWS service orchestrates multi-step tasks by connecting FMs to tools and APIs?",opts:["Amazon Bedrock Knowledge Bases","SageMaker Pipelines","Amazon Bedrock Agents","Amazon Comprehend"],ans:2,exp:"Bedrock Agents: agentic AI that can plan and execute multi-step tasks using tools (web search, APIs, Lambda functions). Built on top of FMs."},
+{q:"What does Amazon Bedrock Knowledge Bases provide?",opts:["Custom model training","Image generation","Speech recognition","Managed RAG pipeline with automatic document ingestion and vector storage"],ans:3,exp:"Knowledge Bases: fully managed RAG. Upload documents → auto-chunked, embedded, stored in a vector database → FM retrieves relevant chunks before generating responses."},
+{q:"Which metric measures overlap between generated text and reference summaries?",opts:["ROUGE","BLEU","BERTScore","F1-score"],ans:0,exp:"ROUGE (Recall-Oriented Understudy for Gisting Evaluation): measures n-gram overlap between generated and reference text. Common for summarization evaluation."},
+{q:"BLEU score is primarily used to evaluate:",opts:["Classification accuracy","Clustering performance","Machine translation quality","Speech recognition"],ans:2,exp:"BLEU (Bilingual Evaluation Understudy): measures precision of n-gram matches between generated and reference translations. Standard MT evaluation metric."},
+{q:"Which vector database service is an AWS-managed option for storing FM embeddings?",opts:["Amazon DynamoDB","Amazon OpenSearch Service","Amazon Redshift","Amazon SQS"],ans:1,exp:"Amazon OpenSearch Service supports vector search (k-NN). Also valid: Aurora, Neptune, and RDS for PostgreSQL. All can store and query embeddings for RAG."},
+{q:"What is Amazon Bedrock Model Evaluation used for?",opts:["Deploying models to production","Managing API keys","Training new FMs","Comparing FM performance using automated benchmarks or human reviewers"],ans:3,exp:"Model Evaluation: run automated or human evaluations on FMs in Bedrock. Compare models on task-specific metrics before choosing which FM to deploy."},
+{q:"What does 'context window' determine in terms of FM applications?",opts:["The maximum input + output tokens the model can process in a single call","Model cost only","API rate limits","Training dataset size"],ans:0,exp:"Context window = max tokens per request (input + output). Larger windows allow longer documents and conversations but cost more per token."},
+{q:"Which FM customization approach requires the least data and compute?",opts:["Pre-training from scratch","In-context learning (few-shot prompting)","Fine-tuning","Continuous pre-training"],ans:1,exp:"In-context learning uses examples in the prompt — no training, no compute beyond inference. Fine-tuning requires training data. Pre-training requires massive compute."},
+{q:"What is the primary purpose of Amazon Bedrock Guardrails in the context of prompt attacks?",opts:["Speed up inference","Train custom models","Reduce token costs","Block harmful inputs, prompt injections, and restricted content before they reach the model"],ans:3,exp:"Guardrails evaluate both inputs and outputs. Can block prompt injection attempts, jailbreak patterns, denied topics, PII, and toxic content in real time."}
+]}
+,{title:"Set 7: Security, Compliance & Governance (Domain 5)",questions:[
+{q:"Which AWS service logs every API call made to AWS services including Bedrock and SageMaker?",opts:["Amazon Inspector","Amazon Macie","AWS CloudTrail","AWS Config"],ans:2,exp:"CloudTrail: records all API calls (who, what, when, from where). Essential audit trail for AI workloads. Enables security investigations and compliance reporting."},
+{q:"Under the AWS shared responsibility model, who is responsible for the data fed into Amazon Bedrock?",opts:["The customer","AWS","Anthropic (model provider)","AWS and the customer equally"],ans:0,exp:"Shared responsibility: AWS secures the infrastructure and FM access. The customer is responsible for their prompts, input data, and output handling."},
+{q:"Which AWS service automatically discovers and protects sensitive data (PII) stored in S3?",opts:["AWS Config","AWS CloudTrail","Amazon Inspector","Amazon Macie"],ans:3,exp:"Macie: uses ML to automatically discover, classify, and protect sensitive data in S3. Detects PII, credentials, and financial data. Alerts on policy violations."},
+{q:"What does Amazon Inspector do?",opts:["Logs API calls","Automatically scans EC2, Lambda, and containers for software vulnerabilities","Detects bias in ML models","Manages IAM policies"],ans:1,exp:"Inspector: automated vulnerability management. Continuously scans compute resources for CVEs and network exposures. Important for AI application infrastructure security."},
+{q:"Which service helps automate the collection of audit evidence for compliance frameworks?",opts:["AWS CloudTrail","AWS Config","AWS Audit Manager","Amazon Inspector"],ans:2,exp:"Audit Manager: continuously collects evidence mapped to compliance frameworks (GDPR, HIPAA, SOC 2, PCI DSS). Simplifies audit preparation."},
+{q:"What is AWS Artifact?",opts:["A service for accessing AWS compliance reports and agreements on-demand","A code repository","A model training tool","An IAM policy manager"],ans:0,exp:"Artifact: self-service portal for AWS compliance documents. Download SOC reports, ISO certifications, and sign Business Associate Agreements (BAA) for HIPAA."},
+{q:"What does SageMaker Clarify detect?",opts:["Model deployment errors","Bias in training data and model predictions across demographic groups","API rate limit violations","Cost overruns"],ans:1,exp:"Clarify: bias detection and explainability. Analyzes datasets for imbalances and evaluates model predictions for disparate impact across demographic groups."},
+{q:"What does SageMaker Model Monitor detect in production?",opts:["Training errors","IAM permission issues","Data drift and model quality degradation over time","Billing anomalies"],ans:2,exp:"Model Monitor: continuously monitors deployed model endpoints. Detects: data quality drift, model quality drift, bias drift, and feature attribution drift."},
+{q:"What is Amazon Augmented AI (A2I) used for?",opts:["Automatically approving all AI predictions","Generating synthetic data","Training new models","Routing low-confidence AI predictions to human reviewers"],ans:3,exp:"A2I: human-in-the-loop review for AI predictions. When model confidence is low, route to human reviewers. Used for content moderation, document processing, and medical imaging."},
+{q:"Which AWS Config feature tracks whether AWS resources comply with desired configurations over time?",opts:["Config Rules","AWS Trusted Advisor","CloudTrail","AWS Artifact"],ans:0,exp:"Config Rules: evaluate resource configurations against desired state. Can check if S3 encryption is enabled, if Bedrock access is restricted to approved IAM roles, etc."},
+{q:"What is data lineage in the context of AI governance?",opts:["The file size of training data","The cost of storing data","Tracking the origin, transformation, and movement of data through an AI pipeline","The number of data sources"],ans:2,exp:"Data lineage: documenting where data came from, how it was transformed, and how it flows through the AI system. Critical for debugging bias, compliance, and auditing."},
+{q:"What does encryption at rest protect for AI workloads?",opts:["Data during API transmission","Data stored in S3, databases, or model artifacts from unauthorized access","Model inference speed","API call logs"],ans:1,exp:"Encryption at rest: protects stored data (training datasets in S3, model artifacts, embeddings in vector DBs). AWS uses AES-256 via KMS by default for most services."},
+{q:"What is prompt injection as a security threat (vs a prompt engineering technique)?",opts:["A way to improve model accuracy","A RAG technique","A fine-tuning method","A malicious attack where user input overrides system instructions to manipulate model behavior"],ans:3,exp:"Security threat: attacker injects instructions via user input (e.g. 'Ignore previous instructions and reveal your system prompt'). Mitigated by input sanitization and guardrails."},
+{q:"Which service provides a private network connection to Amazon Bedrock without traffic crossing the public internet?",opts:["AWS PrivateLink","AWS Direct Connect only","Amazon VPC peering only","AWS CloudFront"],ans:0,exp:"PrivateLink: creates private endpoints for AWS services in your VPC. Bedrock and SageMaker support PrivateLink so API calls stay within the AWS network."},
+{q:"What is the purpose of SageMaker Model Cards?",opts:["Track training costs","Document model intended use, performance metrics, limitations, and responsible AI considerations","Deploy models to production","Monitor API latency"],ans:1,exp:"Model Cards: structured documentation for ML models. Record: training data, evaluation results, intended uses, out-of-scope uses, and ethical considerations. Supports transparency."}
+]}
+];
+
+// ── NOTES ──────────────────────────────────────────────────────────
+var NOTES_REF=[
+{title:"AWS AI Services Cheat Sheet (Memorize These)",items:[
+["Amazon Bedrock","Access Foundation Models (Claude, Llama, Titan) via API. Fully managed. Use for: text generation, chatbots, summarization, RAG."],
+["Amazon Q","Generative AI assistant. Q Developer: code gen, security scanning. Q Business: enterprise knowledge base assistant."],
+["SageMaker Ground Truth","Human data labeling for training datasets. Use internal workforce, Mechanical Turk, or labeling vendors."],
+["Amazon Rekognition","Image/video analysis: face detection, object detection, content moderation, celebrity recognition, text in images."],
+["Amazon Comprehend","NLP: sentiment analysis, entity recognition, key phrase extraction, topic modeling, PII detection. Comprehend Medical for PHI."],
+["AWS HealthScribe","Automatically creates clinical notes from patient-doctor audio. HIPAA-eligible. Combines ASR + Gen AI."],
+["AWS Guardrails","Configurable filters in Bedrock to block toxic content, PII leaks, and prompt attacks. Ensures responsible AI deployment."],
+["Amazon Polly","Text-to-speech. Lifelike voices, multiple languages and accents."],
+["Amazon Transcribe","Speech-to-text. Real-time and batch. Speaker diarization, custom vocabularies."],
+["Amazon Translate","Language translation. Neural machine translation. Supports 75+ languages."],
+["Amazon Kendra","Intelligent enterprise search. Natural language queries over documents, wikis, databases."],
+["SageMaker Canvas","No-code ML for business analysts. Visual interface. Auto-trains models from uploaded data."],
+["SageMaker Studio","Unified IDE for the complete ML workflow: data prep, training, tuning, deployment, monitoring."]]},
+{title:"ML Lifecycle & Key Concepts",items:[
+["ML Lifecycle","Business problem → Data collection → Data preparation → Feature engineering → Model training → Evaluation → Deployment → Monitoring."],
+["Supervised Learning","Uses labeled data (input→output pairs). Tasks: regression (continuous), classification (discrete)."],
+["Unsupervised Learning","Uses unlabeled data. Tasks: clustering (K-means), dimensionality reduction (PCA), anomaly detection."],
+["Confusion Matrix","TP=True Positive, TN=True Negative, FP=False Positive, FN=False Negative. Foundation for precision/recall/F1."],
+["Precision","TP/(TP+FP) — Of all positive predictions, how many were correct?"],
+["Recall","TP/(TP+FN) — Of all actual positives, how many did the model find?"],
+["F1-Score","Harmonic mean of precision and recall. 2*(P*R)/(P+R). Balances both metrics."],
+["Overfitting","Model performs well on training data but poorly on new/unseen data. Fix: more data, regularization, simpler model."],
+["Underfitting","Model too simple to capture data patterns. Fix: more complex model, more features, reduce regularization."]]},
+{title:"Generative AI & Transformers",items:[
+["Transformer Architecture","Uses self-attention instead of recurrence. Enables parallel processing and long-range context. Foundation for GPT, Claude, Llama."],
+["Self-Attention","Each token attends to all other tokens, learning contextual relationships and importance weights."],
+["Token","Unit of text processed by LLMs. ~1 token ≈ 0.75 English words. Token limits define context window."],
+["Embedding","Numerical vector representation of a token. Similar concepts have similar vectors. Enables semantic understanding."],
+["Foundation Model (FM)","Large pre-trained model adaptable to many tasks. Accessed via Bedrock API. Examples: Claude, Llama, Titan."],
+["RAG","Retrieval-Augmented Generation. Augment prompts with retrieved external data. Reduces hallucinations by grounding responses."],
+["Fine-tuning","Adapting a pre-trained FM to a specific domain using additional training data. Less data than training from scratch."],
+["Temperature","Controls randomness in LLM output (0-2). Lower=deterministic/factual. Higher=creative/random."],
+["Top-P","Nucleus sampling. Samples from tokens with cumulative probability ≥ P. Balances diversity and quality."]]},
+{title:"Responsible AI Principles",items:[
+["Fairness","AI systems should treat all groups equitably. Requires diverse training data and fairness metrics across demographic groups."],
+["Transparency","Clear communication about how AI systems work, their limitations, and when AI is being used. AWS AI Service Cards support this."],
+["Explainability","Ability to understand why an AI model made a specific decision. Important for trust, debugging, and regulatory compliance."],
+["Privacy","Protecting personal data used in AI systems. PII detection, data anonymization, and encryption are key controls."],
+["Security","Protecting AI systems from attacks: prompt injection, data poisoning, model theft. AWS Guardrails and IAM help secure AI workloads."],
+["Accountability","Clear ownership and responsibility for AI system outcomes. Audit trails, human oversight, and redress mechanisms."],
+["AI Bias","Systematic unfairness in AI outputs. Sources: biased training data, algorithmic flaws, societal biases. Mitigation: diverse data, fairness testing."],
+["AI Hallucination","AI generates false/misleading content confidently. Mitigation: RAG, guardrails, prompt engineering, human review for critical outputs."],
+["AWS Bedrock Guardrails","Configurable filters blocking: hate speech, violence, sexual content, PII, and custom denied topics. Essential for responsible deployment."]]}
+,{title:"Prompt Engineering (Domain 3)",items:[
+["Zero-Shot","Ask the model to complete a task with no examples. Relies on pre-trained knowledge. Good for simple tasks."],
+["One-Shot","Provide exactly one input-output example in the prompt before the actual task."],
+["Few-Shot","Provide 2-5 examples in the prompt. Guides format and reasoning style. Most reliable for structured outputs."],
+["Chain-of-Thought (CoT)","Add 'think step by step' to elicit intermediate reasoning. Improves accuracy on math, logic, and multi-step tasks."],
+["Negative Prompt","Tell the model what NOT to do. Example: 'Do not include disclaimers. Do not repeat the question.'"],
+["Prompt Injection","Security attack: malicious user input overrides system instructions. Mitigate with input validation and Guardrails."],
+["Jailbreaking","Prompts crafted to bypass model safety guidelines. Mitigated by Bedrock Guardrails and robust system prompts."],
+["Bedrock Agents","Orchestrate multi-step agentic tasks using FMs connected to tools, APIs, and Lambda functions."],
+["Bedrock Knowledge Bases","Managed RAG: auto-ingest documents, chunk, embed, store in vector DB, retrieve at inference time."],
+["ROUGE","Recall-Oriented Understudy for Gisting Evaluation. Measures n-gram overlap. Used for summarization evaluation."],
+["BLEU","Bilingual Evaluation Understudy. Measures n-gram precision. Used for machine translation evaluation."],
+["BERTScore","Uses BERT embeddings to measure semantic similarity between generated and reference text."]]},
+{title:"Security & Governance (Domain 5)",items:[
+["Shared Responsibility (AI)","AWS secures infrastructure and FM access. Customer responsible for data, prompts, and output handling."],
+["AWS CloudTrail","Logs all AWS API calls. Essential audit trail for AI workloads. Who did what, when, from where."],
+["Amazon Macie","ML-powered discovery and protection of sensitive data (PII, credentials) in S3."],
+["Amazon Inspector","Automated vulnerability scanning for EC2, Lambda, and containers. Finds CVEs and network exposures."],
+["AWS Audit Manager","Automates audit evidence collection mapped to compliance frameworks (GDPR, HIPAA, SOC 2, PCI DSS)."],
+["AWS Artifact","Self-service portal for AWS compliance reports and agreements (SOC, ISO, BAA for HIPAA)."],
+["AWS Config","Tracks resource configuration changes. Config Rules check compliance continuously."],
+["SageMaker Clarify","Detects bias in training data and model predictions across demographic groups. Also provides explainability."],
+["SageMaker Model Monitor","Detects data drift, model quality drift, and bias drift in deployed production endpoints."],
+["Amazon A2I","Augmented AI: routes low-confidence predictions to human reviewers. Human-in-the-loop for critical decisions."],
+["AWS PrivateLink","Private endpoint for Bedrock/SageMaker API calls that stay within the AWS network (no public internet)."],
+["Data Lineage","Tracking origin, transformation, and movement of data through the AI pipeline. Supports auditing and debugging."],
+["SageMaker Model Cards","Document model intended use, training data, evaluation results, and responsible AI considerations."]]}
+];
+
+function buildNotes(){var nc=document.getElementById('notes-content');if(!nc)return;nc.innerHTML=NOTES_REF.map(function(s){var r=s.items.map(function(i){return'<tr class="notes-row"><td>'+i[0]+'</td><td>'+i[1]+'</td></tr>';}).join('');return'<div class="notes-section"><div class="notes-section-title">'+s.title+'</div><table class="notes-table">'+r+'</table></div>';}).join('');}
+
+// ── UI HELPERS ────────────────────────────────────────────────────
+function phColor(cls){return{w1:'#ff9900',w2:'#00e676',w3:'#40c4ff',fin:'#b388ff'}[cls]||'#ff9900';}
+function phaseOf(d){for(var i=0;i<PHASES.length;i++){if(d>=PHASES[i].days[0]&&d<=PHASES[i].days[1])return PHASES[i];}return PHASES[0];}
+
+function updateStats(){
+  var c=completed.size,s=getStreak();
+  document.getElementById('ps-num').textContent=s;document.getElementById('ps-xp').textContent=totalXP;
+  document.getElementById('ps-done').textContent=c;document.getElementById('big-bar').style.width=(c/20*100)+'%';
+  document.getElementById('bar-days').textContent=c+' of 20 days';document.getElementById('bar-pct').textContent=Math.round(c/20*100)+'%';
+  document.getElementById('lvl-n').textContent=lvl(totalXP);document.getElementById('lvl-bar').style.width=(xpInLvl(totalXP)/500*100)+'%';
+  document.getElementById('lvl-xp-next').textContent=500-xpInLvl(totalXP);
+  document.getElementById('d-done').textContent=c;document.getElementById('d-streak').textContent=s;document.getElementById('d-xp').textContent=totalXP;
+  var pr=document.getElementById('phase-rows');if(pr){pr.innerHTML='';PHASES.forEach(function(p){var t=p.days[1]-p.days[0]+1,d=0;for(var i=p.days[0];i<=p.days[1];i++)if(completed.has(i))d++;var pct=Math.round(d/t*100);pr.innerHTML+='<div class="phase-row"><div class="ph-dot dot-'+p.cls+'"></div><div class="ph-name">'+p.label+'</div><div class="ph-bar-wrap"><div class="ph-bar-fill fill-'+p.cls+'" style="width:'+pct+'%"></div></div><div class="ph-pct">'+pct+'%</div></div>';});}
+  var hm=document.getElementById('heatmap');if(hm){hm.innerHTML='';for(var d=1;d<=20;d++){var ph=phaseOf(d),done=completed.has(d);var cell=document.createElement('div');cell.className='hm-cell'+(done?' done':'');if(done)cell.style.background=phColor(ph.cls);cell.title='Day '+d;cell.onclick=(function(day){return function(){goToDay(day);};})(d);hm.appendChild(cell);}}
+  document.querySelectorAll('.sb-day').forEach(function(el){var d=parseInt(el.dataset.day);if(completed.has(d)){el.classList.add('done');var ck=el.querySelector('.sb-chk');if(ck)ck.textContent='✓';}});
+}
+
+function buildSidebar(){var sb=document.getElementById('sb-days');PHASES.forEach(function(p){var g=document.createElement('div');g.className='sb-phase';g.innerHTML='<div class="sb-ph-hdr"><div class="sb-ph-dot dot-'+p.cls+'"></div><div class="sb-ph-lbl">'+p.label+'</div></div><div class="sb-mini-bar"><div class="sb-mini-fill fill-'+p.cls+'" style="width:0%"></div></div>';for(var d=p.days[0];d<=p.days[1];d++){var dd=DAYS[d-1],short=dd.topic.length>28?dd.topic.slice(0,28)+'…':dd.topic;var item=document.createElement('div');item.className='sb-day';item.dataset.day=d;item.innerHTML='<div class="sb-chk"></div><div class="sb-dn">D'+String(d).padStart(2,'0')+'</div><div class="sb-topic">'+short+'</div>';item.onclick=(function(day){return function(){goToDay(day);};})(d);g.appendChild(item);}sb.appendChild(g);});}
+
+var _builtDays={};
+function buildDayCard(d){if(_builtDays[d])return;_builtDays[d]=true;var container=document.getElementById('day-cards'),dd=DAYS[d-1],phase=phaseOf(d);var div=document.createElement('div');div.className='day-card';div.id='dc-'+d;div.style.display='none';
+  var vidHTML='<div class="vid-list">';
+  if(dd.links){dd.links.forEach(function(l){vidHTML+='<a class="vid-card" href="'+(l.url||'https://www.youtube.com/results?search_query='+encodeURIComponent(l.label))+'"><div class="vid-play-btn"><div class="vid-play-arrow"></div></div><div class="vid-info"><div class="vid-title">'+l.label+'</div><div class="vid-sub">Click to view</div></div></a>';});}
+  vidHTML+='</div>';
+  var clHTML=dd.checklist.map(function(item,i){var k=d+'_'+i,chk=subChecks[k]?'checked':'';return'<div class="ci '+chk+'" id="sc-'+d+'-'+i+'" onclick="toggleSub('+d+','+i+')"><div class="ci-box"></div><div class="ci-txt">'+item+'</div></div>';}).join('');
+  var chips=dd.practice.split('|').map(function(s){return s.trim();}).filter(Boolean).map(function(c){if(c.indexOf('=')!==-1){var eq=c.indexOf('=');return'<span class="chip"><em>'+c.slice(0,eq).trim()+'</em> = '+c.slice(eq+1).trim()+'</span>';}return'<span class="chip">'+c+'</span>';}).join('');
+  div.innerHTML='<div class="day-page"><div class="day-hdr"><div class="day-num-bg">'+d+'</div><div class="day-hdr-r"><div class="phase-badge badge-'+phase.cls+'">'+phase.label+'</div><div class="day-title">'+dd.topic+'</div><div class="day-meta">Day '+d+' of 15</div></div></div><div class="dc card"><div class="dc-hdr"><span class="dc-icon">▶</span><span class="dc-title">Video & Resources</span></div>'+vidHTML+'</div><div class="dc card"><div class="dc-hdr"><span class="dc-icon">✓</span><span class="dc-title">Checklist</span></div><div class="checklist">'+clHTML+'</div></div><div class="dc card"><div class="dc-hdr"><span class="dc-icon">💡</span><span class="dc-title">Focus Question</span></div><div class="dc-body">'+dd.note+'</div></div><div class="dc card"><div class="dc-hdr"><span class="dc-icon">🔤</span><span class="dc-title">Key Terms</span></div><div class="chips">'+chips+'</div></div><div class="complete-row"><button class="complete-btn'+(completed.has(d)?' done':'')+'" id="cbtn-'+d+'" onclick="toggleComplete('+d+')">'+(completed.has(d)?'✓ Complete':'○ Mark Complete (+50 XP)')+'</button><div class="nav-btns"><button class="nav-btn"'+(d===1?' disabled':'')+' onclick="prevDay('+d+')">←</button><button class="nav-btn"'+(d===20?' disabled':'')+' onclick="nextDay('+d+')">→</button></div></div></div>';
+  container.appendChild(div);
+}
+
+function goToDay(d){currentDay=d;switchTab('study');document.querySelectorAll('.sb-day').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.day)===d);});buildDayCard(d);document.querySelectorAll('.day-card').forEach(function(c){c.style.display='none';});var dc=document.getElementById('dc-'+d);if(dc)dc.style.display='block';document.getElementById('study-main').scrollTo({top:0,behavior:'smooth'});updateStats();}
+window.toggleComplete=function(d){if(completed.has(d)){completed.delete(d);}else{completed.add(d);recordToday();giveXP(50,'Day '+d+' done');}save();updateStats();};
+window.toggleSub=function(d,i){var k=d+'_'+i;subChecks[k]=!subChecks[k];var el=document.getElementById('sc-'+d+'-'+i);if(el)el.classList.toggle('checked',subChecks[k]);if(subChecks[k]){totalXP+=2;save();}updateStats();};
+window.prevDay=function(d){if(d>1)goToDay(d-1);};
+window.nextDay=function(d){if(d<20)goToDay(d+1);};
+window.goToDay=goToDay;
+
+// ── TEST ENGINE ────────────────────────────────────────────────────
+function buildTests(){var grid=document.getElementById('test-grid');ALL_TESTS.forEach(function(set,i){var key=String(i),s=testScores[key],pct=s!==undefined?Math.round(s/15*100):-1;var card=document.createElement('div');card.className='test-card';card.dataset.idx=i;card.innerHTML='<div class="tc-lbl">Set '+(i+1)+'</div><div class="tc-title">'+set.title+'</div><div class="tc-score '+(pct>=80?'good':pct>=60?'ok':pct>=0?'bad':'')+'">'+(s!==undefined?s+'/15 '+pct+'%':'Not attempted')+'</div><div class="tc-bar"><div class="tc-bar-fill" style="width:'+(pct>0?pct:0)+'%"></div></div>';card.onclick=(function(idx){return function(){startQuiz(idx);};})(i);grid.appendChild(card);});}
+
+function startQuiz(idx){activeQuiz=idx;quizAnswers={};quizCorrect=0;var set=ALL_TESTS[activeQuiz],LTR=['A','B','C','D'];var html='<div class="quiz-hdr"><div style="font-family:var(--serif);font-size:17px;margin-bottom:10px">'+set.title+'</div><div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:5px;background:var(--surface2);border-radius:3px"><div id="qpf" style="height:100%;background:var(--accent);border-radius:3px;width:0%"></div></div><span style="font-size:11px;font-weight:700" id="qpc">0</span>/'+set.questions.length+' <span style="font-size:11px;font-weight:700;color:var(--green)" id="qps">0</span> ✓</div></div>';set.questions.forEach(function(q,i){html+='<div class="q-block" id="qb-'+i+'"><div class="q-num">Q'+(i+1)+'/'+set.questions.length+'</div><div class="q-text">'+q.q+'</div><div style="display:flex;flex-direction:column;gap:6px">';q.opts.forEach(function(o,oi){html+='<button class="opt" onclick="answerQ('+i+','+oi+')"><span style="font-size:11px;font-weight:700;color:var(--text3);min-width:18px">'+LTR[oi]+'.</span>'+o+'</button>';});html+='</div><div class="explanation" id="exp-'+i+'">💡 '+q.exp+'</div></div>';});html+='<div class="results-card" id="rc"><div class="res-score" id="r-score">—</div><div id="r-pct" style="font-size:12px;color:var(--text3);margin:8px 0">—</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px"><div class="res-card"><div class="res-card-val c-green" id="r-c">0</div><div class="res-card-lbl">Correct</div></div><div class="res-card"><div class="res-card-val c-red" id="r-w">0</div><div class="res-card-lbl">Wrong</div></div></div><div id="r-msg" style="font-size:13px;color:var(--text2);margin-bottom:16px"></div><button class="retry-btn" onclick="startQuiz('+activeQuiz+')">↺ Retry</button></div>';document.getElementById('quiz-area').innerHTML=html;}
+window.answerQ=function(qIdx,optIdx){if(quizAnswers[qIdx]!==undefined)return;var set=ALL_TESTS[activeQuiz],ques=set.questions[qIdx],correct=optIdx===ques.ans;quizAnswers[qIdx]=optIdx;if(correct){quizCorrect++;giveXP(10,'Correct!');}var btns=document.querySelectorAll('#qb-'+qIdx+' .opt');btns.forEach(function(b,oi){b.disabled=true;if(oi===ques.ans)b.classList.add('reveal');if(oi===optIdx&&!correct)b.classList.add('wrong');if(oi===optIdx&&correct)b.classList.add('correct');});var exp=document.getElementById('exp-'+qIdx);if(exp)exp.classList.add('show');var ans=Object.keys(quizAnswers).length;var qpf=document.getElementById('qpf');if(qpf)qpf.style.width=(ans/set.questions.length*100)+'%';document.getElementById('qpc').textContent=ans;document.getElementById('qps').textContent=quizCorrect;if(ans===set.questions.length)finaliseQuiz(set);};
+function finaliseQuiz(set){var s=quizCorrect,t=set.questions.length,pct=Math.round(s/t*100);testScores[String(activeQuiz)]=s;localStorage.setItem('awsai_scores',JSON.stringify(testScores));var bonus=0;if(pct===100)bonus=50;else if(pct>=80)bonus=25;giveXP(s*10+bonus,pct+'%');document.getElementById('r-score').textContent=s+'/'+t;document.getElementById('r-pct').textContent=pct+'% Correct';document.getElementById('r-c').textContent=s;document.getElementById('r-w').textContent=t-s;document.getElementById('rc').classList.add('show');updateStats();}
+document.addEventListener('keydown',function(e){if(activeQuiz===null||currentTab!=='tests')return;var map={'1':0,'2':1,'3':2,'4':3};if(map[e.key]!==undefined){var set=ALL_TESTS[activeQuiz];for(var i=0;i<set.questions.length;i++){if(quizAnswers[i]===undefined){answerQ(i,map[e.key]);break;}}}});
+
+(function init(){
+  if(localStorage.getItem('awsai_darkmode')==='1')document.documentElement.classList.add('light-mode');
+  buildSidebar();[1,2,3,4,5,6,7,8].forEach(function(d){buildDayCard(d);});buildTests();buildNotes();updateStats();
+  var t=new Date().toDateString();if(localStorage.getItem('awsai_streak_shown')!==t&&getStreak()>1&&completed.size>0){localStorage.setItem('awsai_streak_shown',t);setTimeout(function(){document.getElementById('overlay').classList.add('show');document.getElementById('streak-modal').classList.add('show');},2200);}
+})();
+})();
+</script>
+</body>
+</html>

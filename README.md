@@ -4,6 +4,8 @@ A self-contained, single-file HTML study app for the **AWS Certified AI Practiti
 
 ---
 
+Live at : https://touhidsiddiqueeraj-bit.github.io/AWS-AI-Study/
+
 ## Features
 
 - **20-day structured study plan** aligned to all 5 official exam domains
